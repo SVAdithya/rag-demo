@@ -1,0 +1,89 @@
+import { useState, useEffect } from 'react';
+import { Document } from './types';
+import { api } from './api';
+import DocumentUpload from './components/DocumentUpload';
+import DocumentList from './components/DocumentList';
+import ChatInterface from './components/ChatInterface';
+import './App.css';
+
+function App() {
+  const [documentModels, setDocuments] = useState<Document[]>([]);
+  const [selectedDocument, setSelectedDocument] = useState<Document | null>(null);
+  const [sessionId] = useState(() => `session-${Date.now()}`);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    loadDocuments();
+  }, []);
+
+  const loadDocuments = async () => {
+    try {
+      setLoading(true);
+      const docs = await api.getAllDocuments();
+      setDocuments(docs);
+    } catch (error) {
+      console.error('Error loading documentModels:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDocumentUploaded = (doc: Document) => {
+    setDocuments(prev => [doc, ...prev]);
+    setSelectedDocument(doc);
+  };
+
+  return (
+    <div className="app">
+      <header className="app-header">
+        <h1>🤖 RAG Chatbot - Document Q&A</h1>
+        <p>Upload documentModels, get AI-powered summaries, and ask questions</p>
+      </header>
+
+      <div className="app-container">
+        <aside className="sidebar">
+          <DocumentUpload onDocumentUploaded={handleDocumentUploaded} />
+          <DocumentList
+            documentModels={documentModels}
+            selectedDocument={selectedDocument}
+            onSelectDocument={setSelectedDocument}
+            loading={loading}
+          />
+        </aside>
+
+        <main className="main-content">
+          {selectedDocument ? (
+            <ChatInterface
+              documentModel={selectedDocument}
+              sessionId={sessionId}
+            />
+          ) : (
+            <div className="empty-state">
+              <h2>Welcome to RAG Chatbot</h2>
+              <p>Upload a documentModel or select an existing one to get started</p>
+              <div className="features">
+                <div className="feature">
+                  <span className="icon">📄</span>
+                  <h3>Upload Documents</h3>
+                  <p>Support for PDF, DOCX, and text files</p>
+                </div>
+                <div className="feature">
+                  <span className="icon">✨</span>
+                  <h3>AI Summarization</h3>
+                  <p>Automatic documentModel summarization using Mistral</p>
+                </div>
+                <div className="feature">
+                  <span className="icon">💬</span>
+                  <h3>Q&A Chat</h3>
+                  <p>Ask questions about your documentModels</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
+    </div>
+  );
+}
+
+export default App;
