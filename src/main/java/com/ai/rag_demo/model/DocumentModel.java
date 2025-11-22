@@ -36,4 +36,10 @@ public class DocumentModel {
 
     @Field(type = FieldType.Long)
     private Long size;
+
+    @Field(type = FieldType.Text)
+    private String convertedPdfPath;
+
+    @Field(type = FieldType.Boolean)
+    private Boolean isConverted = false;
 }

@@ -44,3 +44,9 @@ backend.log
 frontend.log
 backend.pid
 frontend.pid
+
+### Converted PDF files ###
+converted-pdfs/
+
+### Local library symlinks ###
+lib/

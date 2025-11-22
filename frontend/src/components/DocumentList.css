@@ -44,6 +44,14 @@
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
+.document-item.removing {
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 0.4s, transform 0.4s;
+  pointer-events: none;
+  animation: fadeOut 0.4s;
+}
+
 .document-icon {
   flex-shrink: 0;
   width: 48px;
@@ -136,5 +144,16 @@
 @keyframes spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.98);
   }
 }

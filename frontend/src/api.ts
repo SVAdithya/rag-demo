@@ -29,14 +29,21 @@ export const api = {
     return response.data;
   },
 
+  deleteDocument: async (documentId: string): Promise<void> => {
+    await axios.delete(`${API_BASE_URL}/documents/${documentId}`);
+  },
+
   // Chat endpoints
-  askQuestion: async (request: ChatRequest): Promise<ChatMessage> => {
-    const response = await axios.post(`${API_BASE_URL}/chat/ask`, request);
+  askQuestion: async ({ documentId, question }: { documentId: string; question: string }): Promise<ChatMessage> => {
+    const response = await axios.post(`${API_BASE_URL}/chat/ask`, {
+      documentId,
+      question,
+    });
     return response.data;
   },
 
-  getChatHistory: async (sessionId: string): Promise<ChatMessage[]> => {
-    const response = await axios.get(`${API_BASE_URL}/chat/history/${sessionId}`);
+  getChatHistory: async (documentId: string): Promise<ChatMessage[]> => {
+    const response = await axios.get(`${API_BASE_URL}/chat/history/${documentId}`);
     return response.data;
   }
 };

@@ -1,15 +1,19 @@
-import { FileText, Clock } from 'lucide-react';
+import { FileText, Clock, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { Document } from '../types';
 import './DocumentList.css';
 
 interface Props {
-  documentModels: Document[];
-  selectedDocument: Document | null;
-  onSelectDocument: (doc: Document) => void;
+  documents: Document[];
+  selectedDocumentId: string | null;
+  onSelectDocumentId: (id: string) => void;
+  onRemoveDocument: (id: string) => void;
   loading: boolean;
 }
 
-function DocumentList({ documentModels, selectedDocument, onSelectDocument, loading }: Props) {
+function DocumentList({ documents, selectedDocumentId, onSelectDocumentId, onRemoveDocument, loading }: Props) {
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -21,34 +25,51 @@ function DocumentList({ documentModels, selectedDocument, onSelectDocument, load
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
+  const handleRemove = (docId: string) => {
+    setRemovingId(docId);
+    setTimeout(() => {
+      onRemoveDocument(docId);
+      setRemovingId(null);
+    }, 400); // matches CSS transition
+  };
+
   return (
-    <div className="documentModel-list">
-      <h2>Documents ({documentModels.length})</h2>
+    <div className="document-list">
+      <h2>Documents ({documents.length})</h2>
       
-      {loading && documentModels.length === 0 ? (
+      {loading && documents.length === 0 ? (
         <div className="loading-state">
           <div className="spinner"></div>
-          <p>Loading documentModels...</p>
+          <p>Loading documents...</p>
         </div>
-      ) : documentModels.length === 0 ? (
+      ) : documents.length === 0 ? (
         <div className="empty-list">
-          <p>No documentModels yet</p>
-          <span>Upload a documentModel to get started</span>
+          <p>No documents yet</p>
+          <span>Upload a document to get started</span>
         </div>
       ) : (
-        <div className="documentModels">
-          {documentModels.map((doc) => (
+        <div className="documents">
+          {documents.map((doc) => (
             <div
               key={doc.id}
-              className={`documentModel-item ${selectedDocument?.id === doc.id ? 'selected' : ''}`}
-              onClick={() => onSelectDocument(doc)}
+              className={`document-item ${selectedDocumentId === doc.id ? 'selected' : ''}${removingId === doc.id ? ' removing' : ''}`}
+              onClick={() => onSelectDocumentId(doc.id)}
             >
-              <div className="documentModel-icon">
+              <div className="document-icon">
                 <FileText size={24} />
               </div>
-              <div className="documentModel-info">
-                <h3>{doc.filename}</h3>
-                <div className="documentModel-meta">
+              <div className="document-info">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3>{doc.filename}</h3>
+                  <button
+                    className="remove-document-btn"
+                    onClick={e => { e.stopPropagation(); if (window.confirm('Remove this document and its history?')) handleRemove(doc.id); }}
+                    title="Remove from history"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+                <div className="document-meta">
                   <span className="meta-item">
                     <Clock size={14} />
                     {formatDate(doc.uploadedAt)}
@@ -58,8 +79,8 @@ function DocumentList({ documentModels, selectedDocument, onSelectDocument, load
                   </span>
                 </div>
                 {doc.summary && (
-                  <div className="documentModel-summary">
-                    <span className="summary-badge">✨ Summary available</span>
+                  <div className="document-summary">
+                    <span className="summary-badge">Summary available</span>
                   </div>
                 )}
               </div>

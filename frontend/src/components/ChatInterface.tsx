@@ -5,11 +5,11 @@ import { api } from '../api';
 import './ChatInterface.css';
 
 interface Props {
-  documentModel: Document;
-  sessionId: string;
+  document: Document;
+  documentId: string;
 }
 
-function ChatInterface({ documentModel, sessionId }: Props) {
+function ChatInterface({ document, documentId }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
@@ -18,7 +18,7 @@ function ChatInterface({ documentModel, sessionId }: Props) {
 
   useEffect(() => {
     loadChatHistory();
-  }, [sessionId]);
+  }, [documentId]);
 
   useEffect(() => {
     scrollToBottom();
@@ -27,7 +27,7 @@ function ChatInterface({ documentModel, sessionId }: Props) {
   const loadChatHistory = async () => {
     try {
       setLoadingHistory(true);
-      const history = await api.getChatHistory(sessionId);
+      const history = await api.getChatHistory(documentId);
       setMessages(history);
     } catch (error) {
       console.error('Error loading chat history:', error);
@@ -47,12 +47,10 @@ function ChatInterface({ documentModel, sessionId }: Props) {
     const currentQuestion = question;
     setQuestion('');
     setLoading(true);
-
     try {
       const response = await api.askQuestion({
         question: currentQuestion,
-        sessionId,
-        documentId: documentModel.id
+        documentId
       });
       setMessages(prev => [...prev, response]);
     } catch (error) {
@@ -73,18 +71,18 @@ function ChatInterface({ documentModel, sessionId }: Props) {
     <div className="chat-interface">
       <div className="chat-header">
         <div className="header-content">
-          <h2>{documentModel.filename}</h2>
-          <span className="documentModel-type">{documentModel.contentType}</span>
+          <h2>{document.filename}</h2>
+          <span className="document-type">{document.contentType}</span>
         </div>
       </div>
 
-      {documentModel.summary && (
+      {document.summary && (
         <div className="summary-section">
           <div className="summary-header">
             <Sparkles size={20} />
             <h3>AI Summary</h3>
           </div>
-          <p className="summary-text">{documentModel.summary}</p>
+          <p className="summary-text">{document.summary}</p>
         </div>
       )}
 
@@ -98,18 +96,12 @@ function ChatInterface({ documentModel, sessionId }: Props) {
           <div className="empty-chat">
             <MessageCircle size={48} />
             <h3>Start a Conversation</h3>
-            <p>Ask questions about the documentModel content</p>
+            <p>Ask questions about the document content</p>
             <div className="suggestions">
               <p>Try asking:</p>
-              <button onClick={() => setQuestion("What is this documentModel about?")}>
-                What is this documentModel about?
-              </button>
-              <button onClick={() => setQuestion("What are the key points?")}>
-                What are the key points?
-              </button>
-              <button onClick={() => setQuestion("Can you summarize the main ideas?")}>
-                Can you summarize the main ideas?
-              </button>
+              <button onClick={() => setQuestion("What is this document about?")}>What is this document about?</button>
+              <button onClick={() => setQuestion("What are the key points?")}>What are the key points?</button>
+              <button onClick={() => setQuestion("Can you summarize the main ideas?")}>Can you summarize the main ideas?</button>
             </div>
           </div>
         ) : (
@@ -154,7 +146,7 @@ function ChatInterface({ documentModel, sessionId }: Props) {
           type="text"
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          placeholder="Ask a question about the documentModel..."
+          placeholder="Ask a question about the document..."
           disabled={loading}
           className="chat-input"
         />

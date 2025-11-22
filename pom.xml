@@ -88,6 +88,20 @@
             <version>5.2.3</version>
         </dependency>
 
+        <!-- Tesseract OCR for making PDFs searchable -->
+        <dependency>
+            <groupId>net.sourceforge.tess4j</groupId>
+            <artifactId>tess4j</artifactId>
+            <version>5.9.0</version>
+        </dependency>
+
+        <!-- PDF rendering for OCR -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox-tools</artifactId>
+            <version>2.0.29</version>
+        </dependency>
+
         <!-- Mistral AI (via Ollama) -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
@@ -152,6 +166,10 @@
 							<artifactId>lombok</artifactId>
 						</exclude>
 					</excludes>
+                    <jvmArguments>
+                        -Djna.library.path=${env.LOCAL_LIB_DIR}:${env.TESSERACT_LIB}:${env.HOMEBREW_LIB}:/usr/local/lib
+                        -Djava.library.path=${env.LOCAL_LIB_DIR}:${env.TESSERACT_LIB}:${env.HOMEBREW_LIB}:/usr/local/lib
+                    </jvmArguments>
 				</configuration>
 			</plugin>
 		</plugins>

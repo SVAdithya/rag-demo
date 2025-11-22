@@ -9,6 +9,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ChatRequest {
     private String question;
-    private String sessionId;
     private String documentId;
 }

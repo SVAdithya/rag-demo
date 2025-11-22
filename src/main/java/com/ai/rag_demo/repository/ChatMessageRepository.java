@@ -8,7 +8,5 @@ import java.util.List;
 
 @Repository
 public interface ChatMessageRepository extends ElasticsearchRepository<ChatMessage, String> {
-    List<ChatMessage> findBySessionIdOrderByTimestampAsc(String sessionId);
-
-    List<ChatMessage> findByDocumentIdOrderByTimestampDesc(String documentId);
+    List<ChatMessage> findByDocumentIdOrderByTimestampAsc(String documentId);
 }

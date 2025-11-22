@@ -96,6 +96,38 @@ public class VectorStoreService {
     }
 
     /**
+     * Search for relevant context across multiple documents
+     */
+    public List<Document> searchRelevantContextInMultipleDocuments(String query, List<String> documentIds, int topK) {
+        log.info("Searching for relevant context in {} documents with query: {}", documentIds.size(), query);
+
+        if (documentIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        if (documentIds.size() == 1) {
+            return searchRelevantContextInDocument(query, documentIds.get(0), topK);
+        }
+
+        // Create filter expression for multiple documents: document_id in ['id1', 'id2', ...]
+        String filterExpression = documentIds.stream()
+                .map(id -> "document_id == '" + id + "'")
+                .collect(Collectors.joining(" || "));
+
+        SearchRequest searchRequest = SearchRequest.builder()
+                .query(query)
+                .topK(topK)
+                .similarityThreshold(0.5)
+                .filterExpression(filterExpression)
+                .build();
+
+        List<Document> results = vectorStore.similaritySearch(searchRequest);
+        log.info("Found {} relevant chunks across {} documents", results.size(), documentIds.size());
+
+        return results;
+    }
+
+    /**
      * Format retrieved documents into context string
      */
     public String formatContext(List<Document> documents) {

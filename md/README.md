@@ -34,6 +34,14 @@ This system now features a **complete RAG (Retrieval Augmented Generation) imple
 - **[HOW_LLM_UPDATES_WORK.md](HOW_LLM_UPDATES_WORK.md)** - How the system updates LLM knowledge
 - **[RAG_SYSTEM_SUMMARY.md](RAG_SYSTEM_SUMMARY.md)** - Complete system overview
 
+### PDF Conversion Feature 🆕
+
+- **[PDF_CONVERSION_FEATURE.md](PDF_CONVERSION_FEATURE.md)** - Technical guide for PDF conversion
+- **[USAGE_EXAMPLE_PDF_CONVERSION.md](USAGE_EXAMPLE_PDF_CONVERSION.md)** - Usage examples and integration guides
+- **[IMAGE_TEXT_EXTRACTION_GUIDE.md](IMAGE_TEXT_EXTRACTION_GUIDE.md)** - Enhanced OCR for extracting text from images 🆕
+- **[OCR_FIX_SUMMARY.md](OCR_FIX_SUMMARY.md)** - Critical fix for image text extraction 🔥
+- **[TEST_OCR_EXTRACTION.md](TEST_OCR_EXTRACTION.md)** - Testing and verification guide
+
 ### Technical Details
 
 - **[RAG_CHATBOT_GUIDE.md](RAG_CHATBOT_GUIDE.md)** - Comprehensive technical guide
@@ -48,6 +56,9 @@ This system now features a **complete RAG (Retrieval Augmented Generation) imple
 ## 🚀 Features
 
 - **Document Upload**: Support for PDF, DOCX, and text files
+- **🆕 PDF Conversion**: Automatic conversion of all files to searchable PDFs with OCR support
+- **🆕 Enhanced OCR**: Always-on OCR extracts text from images within PDFs (charts, diagrams, screenshots)
+- **OCR Support**: Automatic text extraction from scanned PDFs and images using Tesseract with image preprocessing
 - **AI Summarization**: Automatic documentModel summarization using Mistral AI
 - **Q&A Chatbot**: Interactive chat interface for asking questions about documentModels
 - **Semantic Search**: Vector embeddings for intelligent documentModel retrieval
@@ -57,6 +68,7 @@ This system now features a **complete RAG (Retrieval Augmented Generation) imple
 - **Redis Caching**: Fast embedding and response caching
 - **Modern Web UI**: Beautiful, responsive React-based interface
 - **Chat History**: Persistent conversation tracking per session
+- **🆕 Download Converted PDFs**: Get searchable PDF versions of uploaded documents
 
 ## 🛠️ Technology Stack
 
@@ -70,6 +82,7 @@ This system now features a **complete RAG (Retrieval Augmented Generation) imple
 - **Redis**: Caching layer for performance
 - **Apache PDFBox**: PDF text extraction
 - **Apache POI**: DOCX text extraction
+- **Tess4J**: OCR for scanned documents
 
 ### Frontend
 
@@ -157,11 +170,16 @@ spring.data.redis.host=localhost
 # Build the project
 mvn clean install
 
-# Run the Spring Boot application
-mvn spring-boot:run
+# Run the Spring Boot application WITH OCR support (macOS)
+./start-with-ocr.sh
+
+# OR run without OCR script (may have library path issues)
+# mvn spring-boot:run
 ```
 
 The backend will start on `http://localhost:8080`
+
+**Note for macOS users:** Use `./start-with-ocr.sh` to ensure Tesseract library is found correctly.
 
 ### 6. Setup and Run Frontend
 
@@ -255,10 +273,12 @@ rag-demo/
 ## 🔌 API Endpoints
 
 ### Documents
-- `POST /api/documents/upload` - Upload a file
+- `POST /api/documents/upload` - Upload a file (automatically converted to searchable PDF)
 - `POST /api/documents/upload-text` - Upload text content
 - `GET /api/documents` - Get all documents
 - `GET /api/documents/{id}` - Get specific document
+- `GET /api/documents/{id}/download-converted-pdf` - Download searchable PDF version 🆕
+- `DELETE /api/documents/{id}` - Delete document and converted PDF 🆕
 
 ### Chat
 
@@ -690,6 +710,15 @@ docker-compose logs -f elasticsearch
 ```
 
 ## 🐛 Troubleshooting
+
+### OCR Not Working / Can't Extract Text from Images
+
+- **Run diagnostic script**: `./check-ocr-status.sh`
+- **Check Tesseract**: `tesseract --version` (should be 4.0+)
+- **Install Tesseract**:
+    - macOS: `brew install tesseract`
+    - Ubuntu: `sudo apt-get install tesseract-ocr tesseract-ocr-eng`
+- **See detailed guide**: [IMAGE_TEXT_EXTRACTION_GUIDE.md](IMAGE_TEXT_EXTRACTION_GUIDE.md)
 
 ### Elasticsearch not connecting
 - Ensure Elasticsearch is running: `docker ps`
