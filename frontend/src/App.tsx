@@ -32,6 +32,19 @@ function App() {
     setSelectedDocumentId(doc.id);
   };
 
+  const handleRemoveDocument = async (id: string) => {
+    try {
+      await api.deleteDocument(id);
+      setDocuments(prev => prev.filter(doc => doc.id !== id));
+      if (selectedDocumentId === id) {
+        setSelectedDocumentId(null);
+      }
+    } catch (error) {
+      alert('Failed to delete document');
+      console.error(error);
+    }
+  };
+
   return (
     <div className="app">
       <header className="app-header">
@@ -46,6 +59,7 @@ function App() {
             documents={documents}
             selectedDocumentId={selectedDocumentId}
             onSelectDocumentId={setSelectedDocumentId}
+            onRemoveDocument={handleRemoveDocument}
             loading={loading}
           />
         </aside>

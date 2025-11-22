@@ -2,6 +2,7 @@ package com.ai.rag_demo.service;
 
 import com.ai.rag_demo.model.DocumentModel;
 import com.ai.rag_demo.repository.DocumentRepository;
+import com.ai.rag_demo.repository.ChatMessageRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -29,6 +30,7 @@ public class DocumentService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final OCRService ocrService;
     private final PDFConversionService pdfConversionService;
+    private final ChatMessageRepository chatMessageRepository;
 
     public DocumentModel uploadDocument(MultipartFile file) throws IOException {
         log.info("Uploading document: {}", file.getOriginalFilename());
@@ -225,5 +227,10 @@ public class DocumentService {
             documentRepository.deleteById(documentId);
             log.info("Deleted document and its converted PDF: {}", documentId);
         }
+    }
+
+    public void deleteDocumentAndHistory(String documentId) {
+        documentRepository.deleteById(documentId);
+        chatMessageRepository.deleteAll(chatMessageRepository.findByDocumentIdOrderByTimestampAsc(documentId));
     }
 }

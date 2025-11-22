@@ -101,6 +101,17 @@ public class DocumentController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/{documentId}")
+    public ResponseEntity<Void> deleteDocumentAndHistory(@PathVariable String documentId) {
+        try {
+            documentService.deleteDocumentAndHistory(documentId);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            log.error("Error deleting document {}: {}", documentId, e.getMessage(), e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
     private DocumentResponse toResponse(DocumentModel documentModel) {
         DocumentResponse response = new DocumentResponse();
         response.setId(documentModel.getId());

@@ -1,4 +1,5 @@
-import { FileText, Clock } from 'lucide-react';
+import { FileText, Clock, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { Document } from '../types';
 import './DocumentList.css';
 
@@ -6,10 +7,13 @@ interface Props {
   documents: Document[];
   selectedDocumentId: string | null;
   onSelectDocumentId: (id: string) => void;
+  onRemoveDocument: (id: string) => void;
   loading: boolean;
 }
 
-function DocumentList({ documents, selectedDocumentId, onSelectDocumentId, loading }: Props) {
+function DocumentList({ documents, selectedDocumentId, onSelectDocumentId, onRemoveDocument, loading }: Props) {
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -19,6 +23,14 @@ function DocumentList({ documents, selectedDocumentId, onSelectDocumentId, loadi
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  };
+
+  const handleRemove = (docId: string) => {
+    setRemovingId(docId);
+    setTimeout(() => {
+      onRemoveDocument(docId);
+      setRemovingId(null);
+    }, 400); // matches CSS transition
   };
 
   return (
@@ -40,14 +52,23 @@ function DocumentList({ documents, selectedDocumentId, onSelectDocumentId, loadi
           {documents.map((doc) => (
             <div
               key={doc.id}
-              className={`document-item ${selectedDocumentId === doc.id ? 'selected' : ''}`}
+              className={`document-item ${selectedDocumentId === doc.id ? 'selected' : ''}${removingId === doc.id ? ' removing' : ''}`}
               onClick={() => onSelectDocumentId(doc.id)}
             >
               <div className="document-icon">
                 <FileText size={24} />
               </div>
               <div className="document-info">
-                <h3>{doc.filename}</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <h3>{doc.filename}</h3>
+                  <button
+                    className="remove-document-btn"
+                    onClick={e => { e.stopPropagation(); if (window.confirm('Remove this document and its history?')) handleRemove(doc.id); }}
+                    title="Remove from history"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
                 <div className="document-meta">
                   <span className="meta-item">
                     <Clock size={14} />

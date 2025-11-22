@@ -29,6 +29,10 @@ export const api = {
     return response.data;
   },
 
+  deleteDocument: async (documentId: string): Promise<void> => {
+    await axios.delete(`${API_BASE_URL}/documents/${documentId}`);
+  },
+
   // Chat endpoints
   askQuestion: async ({ documentId, question }: { documentId: string; question: string }): Promise<ChatMessage> => {
     const response = await axios.post(`${API_BASE_URL}/chat/ask`, {
