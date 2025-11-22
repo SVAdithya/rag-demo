@@ -28,7 +28,7 @@ public class ChatMessage {
     @Field(type = FieldType.Text)
     private String answer;
 
-    @Field(type = FieldType.Date)
+    @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS||uuuu-MM-dd'T'HH:mm:ss||uuuu-MM-dd||epoch_millis")
     private LocalDateTime timestamp;
 
     @Field(type = FieldType.Keyword)

@@ -70,7 +70,10 @@ public class DocumentService {
     }
 
     public List<DocumentModel> getAllDocuments() {
-        return (List<DocumentModel>) documentRepository.findAll();
+        Iterable<DocumentModel> iterable = documentRepository.findAll();
+        List<DocumentModel> documents = new java.util.ArrayList<>();
+        iterable.forEach(documents::add);
+        return documents;
     }
 
     public DocumentModel getDocumentById(String id) {

@@ -31,7 +31,7 @@ public class DocumentModel {
     @Field(type = FieldType.Keyword)
     private String contentType;
 
-    @Field(type = FieldType.Date)
+    @Field(type = FieldType.Date, format = {}, pattern = "uuuu-MM-dd'T'HH:mm:ss.SSS||uuuu-MM-dd'T'HH:mm:ss||uuuu-MM-dd||epoch_millis")
     private LocalDateTime uploadedAt;
 
     @Field(type = FieldType.Long)

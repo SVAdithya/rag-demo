@@ -21,18 +21,35 @@ public class ChatController {
     private final ChatService chatService;
 
     @PostMapping("/ask")
-    public ResponseEntity<ChatResponse> askQuestion(@RequestBody ChatRequest request) {
+    public ResponseEntity<?> askQuestion(@RequestBody ChatRequest request) {
         try {
-            log.info("Received question: {}", request.getQuestion());
+            // Validate request
+            if (request.getQuestion() == null || request.getQuestion().trim().isEmpty()) {
+                log.error("Question is empty");
+                return ResponseEntity.badRequest().body("Question cannot be empty");
+            }
+            if (request.getSessionId() == null || request.getSessionId().trim().isEmpty()) {
+                log.error("SessionId is empty");
+                return ResponseEntity.badRequest().body("Session ID is required");
+            }
+            if (request.getDocumentId() == null || request.getDocumentId().trim().isEmpty()) {
+                log.error("DocumentId is empty");
+                return ResponseEntity.badRequest().body("Document ID is required");
+            }
+
+            log.info("Received question: {} for document: {}", request.getQuestion(), request.getDocumentId());
             ChatMessage chatMessage = chatService.askQuestion(
                     request.getQuestion(),
                     request.getSessionId(),
                     request.getDocumentId()
             );
             return ResponseEntity.ok(toResponse(chatMessage));
+        } catch (RuntimeException e) {
+            log.error("Error processing question: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         } catch (Exception e) {
-            log.error("Error processing question", e);
-            return ResponseEntity.badRequest().build();
+            log.error("Unexpected error processing question", e);
+            return ResponseEntity.internalServerError().body("An unexpected error occurred");
         }
     }
 

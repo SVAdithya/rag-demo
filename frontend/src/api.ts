@@ -8,24 +8,24 @@ export const api = {
   uploadFile: async (file: File): Promise<Document> => {
     const formData = new FormData();
     formData.append('file', file);
-    const response = await axios.post(`${API_BASE_URL}/documentModels/upload`, formData, {
+    const response = await axios.post(`${API_BASE_URL}/documents/upload`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     });
     return response.data;
   },
 
   uploadText: async (request: DocumentUploadRequest): Promise<Document> => {
-    const response = await axios.post(`${API_BASE_URL}/documentModels/upload-text`, request);
+    const response = await axios.post(`${API_BASE_URL}/documents/upload-text`, request);
     return response.data;
   },
 
   getAllDocuments: async (): Promise<Document[]> => {
-    const response = await axios.get(`${API_BASE_URL}/documentModels`);
+    const response = await axios.get(`${API_BASE_URL}/documents`);
     return response.data;
   },
 
   getDocument: async (id: string): Promise<Document> => {
-    const response = await axios.get(`${API_BASE_URL}/documentModels/${id}`);
+    const response = await axios.get(`${API_BASE_URL}/documents/${id}`);
     return response.data;
   },
 

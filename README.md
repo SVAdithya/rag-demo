@@ -1,8 +1,49 @@
-# RAG Chatbot - Document Q&A System
+# RAG Chatbot - Document Q&A System with LLM Knowledge Updates
 
-A full-stack application that enables users to upload documentModels, get AI-powered summaries, and interact with documentModel
-content through a Q&A chatbot interface. Features **vector embeddings** for semantic search and advanced RAG
-capabilities.
+A full-stack application that enables users to upload documents, get AI-powered summaries, and interact with document
+content through a Q&A chatbot interface. The system **automatically updates the LLM's knowledge base** by indexing
+documents into a vector store, enabling intelligent Q&A about YOUR specific content.
+
+## 🎯 What's New: RAG Implementation
+
+This system now features a **complete RAG (Retrieval Augmented Generation) implementation** that:
+
+- ✅ **Automatically indexes documents** into Elasticsearch vector store
+- ✅ **Updates LLM knowledge** by creating searchable embeddings
+- ✅ **Retrieves relevant context** using semantic search
+- ✅ **Provides accurate answers** based on YOUR documents
+
+### How It Works (Simple)
+
+```
+1. Upload Document → Split into chunks → Generate embeddings → Store in vector DB
+2. Ask Question → Search vectors → Retrieve relevant chunks → Send to LLM → Get answer
+```
+
+**Result:** The LLM answers questions using YOUR documents, not just its training data! 🚀
+
+## 📚 Complete Documentation
+
+### Quick Start
+
+- **[QUICKSTART_RAG.md](QUICKSTART_RAG.md)** - Get running in 5 minutes
+- **[DEMO_WALKTHROUGH.md](DEMO_WALKTHROUGH.md)** - Step-by-step demo with real examples
+
+### Understanding RAG
+
+- **[HOW_LLM_UPDATES_WORK.md](HOW_LLM_UPDATES_WORK.md)** - How the system updates LLM knowledge
+- **[RAG_SYSTEM_SUMMARY.md](RAG_SYSTEM_SUMMARY.md)** - Complete system overview
+
+### Technical Details
+
+- **[RAG_CHATBOT_GUIDE.md](RAG_CHATBOT_GUIDE.md)** - Comprehensive technical guide
+- **[RAG_IMPLEMENTATION_COMPLETE.md](RAG_IMPLEMENTATION_COMPLETE.md)** - Implementation details
+- **[CHANGES_SUMMARY.md](CHANGES_SUMMARY.md)** - All changes made
+
+### Operations
+
+- **[RUNBOOK.md](RUNBOOK.md)** - Operations and troubleshooting
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - System architecture
 
 ## 🚀 Features
 
@@ -214,14 +255,380 @@ rag-demo/
 ## 🔌 API Endpoints
 
 ### Documents
-- `POST /api/documentModels/upload` - Upload a file
-- `POST /api/documentModels/upload-text` - Upload text content
-- `GET /api/documentModels` - Get all documentModels
-- `GET /api/documentModels/{id}` - Get specific documentModel
+- `POST /api/documents/upload` - Upload a file
+- `POST /api/documents/upload-text` - Upload text content
+- `GET /api/documents` - Get all documents
+- `GET /api/documents/{id}` - Get specific document
 
 ### Chat
+
 - `POST /api/chat/ask` - Ask a question
 - `GET /api/chat/history/{sessionId}` - Get chat history
+
+## 🧪 Testing with cURL
+
+### Document API Tests
+
+#### 1. Upload a Text File
+
+```bash
+# Create a sample text file
+echo "Artificial Intelligence is transforming the world. Machine learning is a subset of AI that enables computers to learn from data." > sample.txt
+
+# Upload the file
+curl -X POST http://localhost:8080/api/documents/upload \
+  -F "file=@sample.txt" \
+  -H "Content-Type: multipart/form-data"
+```
+
+Expected response:
+
+```json
+{
+  "id": "uuid-here",
+  "filename": "sample.txt",
+  "contentType": "text/plain",
+  "size": 123,
+  "uploadedAt": "2024-01-15T10:30:00",
+  "summary": null
+}
+```
+
+#### 2. Upload Text Content Directly
+
+```bash
+curl -X POST http://localhost:8080/api/documents/upload-text \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Spring Boot is a powerful framework for building Java applications. It simplifies the development process with auto-configuration and embedded servers.",
+    "filename": "spring-boot-intro.txt"
+  }'
+```
+
+Expected response:
+
+```json
+{
+  "id": "uuid-here",
+  "filename": "spring-boot-intro.txt",
+  "contentType": "text/plain",
+  "size": 150,
+  "uploadedAt": "2024-01-15T10:35:00",
+  "summary": null
+}
+```
+
+#### 3. Get All Documents
+
+```bash
+curl -X GET http://localhost:8080/api/documents \
+  -H "Accept: application/json"
+```
+
+Expected response:
+
+```json
+[
+  {
+    "id": "uuid-1",
+    "filename": "sample.txt",
+    "contentType": "text/plain",
+    "size": 123,
+    "uploadedAt": "2024-01-15T10:30:00",
+    "summary": "This document discusses artificial intelligence and machine learning..."
+  },
+  {
+    "id": "uuid-2",
+    "filename": "spring-boot-intro.txt",
+    "contentType": "text/plain",
+    "size": 150,
+    "uploadedAt": "2024-01-15T10:35:00",
+    "summary": "An introduction to Spring Boot framework..."
+  }
+]
+```
+
+#### 4. Get Specific Document by ID
+
+```bash
+# Replace {document-id} with actual document ID from previous responses
+curl -X GET http://localhost:8080/api/documents/{document-id} \
+  -H "Accept: application/json"
+```
+
+Example with actual ID:
+
+```bash
+curl -X GET http://localhost:8080/api/documents/550e8400-e29b-41d4-a716-446655440000 \
+  -H "Accept: application/json"
+```
+
+Expected response:
+
+```json
+{
+  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "filename": "sample.txt",
+  "contentType": "text/plain",
+  "size": 123,
+  "uploadedAt": "2024-01-15T10:30:00",
+  "summary": "This document discusses artificial intelligence and machine learning..."
+}
+```
+
+#### 5. Upload a PDF File
+
+```bash
+# If you have a PDF file
+curl -X POST http://localhost:8080/api/documents/upload \
+  -F "file=@document.pdf" \
+  -H "Content-Type: multipart/form-data"
+```
+
+#### 6. Upload a DOCX File
+
+```bash
+# If you have a Word document
+curl -X POST http://localhost:8080/api/documents/upload \
+  -F "file=@document.docx" \
+  -H "Content-Type: multipart/form-data"
+```
+
+### Chat API Tests
+
+#### 7. Ask a Question About Uploaded Documents
+
+```bash
+curl -X POST http://localhost:8080/api/chat/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is artificial intelligence?",
+    "sessionId": "test-session-123"
+  }'
+```
+
+Expected response:
+
+```json
+{
+  "id": "chat-msg-id",
+  "question": "What is artificial intelligence?",
+  "answer": "Based on the documents, Artificial Intelligence is transforming the world. It encompasses various technologies including machine learning, which is a subset of AI that enables computers to learn from data.",
+  "sessionId": "test-session-123",
+  "timestamp": "2024-01-15T10:40:00"
+}
+```
+
+#### 8. Ask a Follow-up Question
+
+```bash
+curl -X POST http://localhost:8080/api/chat/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "Can you tell me more about machine learning?",
+    "sessionId": "test-session-123"
+  }'
+```
+
+#### 9. Ask About Spring Boot
+
+```bash
+curl -X POST http://localhost:8080/api/chat/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What are the benefits of Spring Boot?",
+    "sessionId": "test-session-456"
+  }'
+```
+
+#### 10. Get Chat History for a Session
+
+```bash
+# Get history for session test-session-123
+curl -X GET http://localhost:8080/api/chat/history/test-session-123 \
+  -H "Accept: application/json"
+```
+
+Expected response:
+
+```json
+[
+  {
+    "id": "chat-msg-1",
+    "question": "What is artificial intelligence?",
+    "answer": "Based on the documents, Artificial Intelligence is...",
+    "sessionId": "test-session-123",
+    "timestamp": "2024-01-15T10:40:00"
+  },
+  {
+    "id": "chat-msg-2",
+    "question": "Can you tell me more about machine learning?",
+    "answer": "Machine learning is a subset of AI that...",
+    "sessionId": "test-session-123",
+    "timestamp": "2024-01-15T10:42:00"
+  }
+]
+```
+
+### Complete Test Workflow
+
+Here's a complete workflow to test the entire system:
+
+```bash
+# Step 1: Upload a document with technical content
+curl -X POST http://localhost:8080/api/documents/upload-text \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "Docker is a platform for developing, shipping, and running applications in containers. Containers are lightweight, portable, and provide consistent environments across different systems. Docker Compose is a tool for defining and running multi-container Docker applications.",
+    "filename": "docker-basics.txt"
+  }'
+
+# Wait 5-10 seconds for processing and summarization
+sleep 10
+
+# Step 2: Verify document was uploaded and processed
+curl -X GET http://localhost:8080/api/documents
+
+# Step 3: Ask a question about the document
+curl -X POST http://localhost:8080/api/chat/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is Docker?",
+    "sessionId": "workflow-test-001"
+  }'
+
+# Step 4: Ask a follow-up question
+curl -X POST http://localhost:8080/api/chat/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is Docker Compose?",
+    "sessionId": "workflow-test-001"
+  }'
+
+# Step 5: View the chat history
+curl -X GET http://localhost:8080/api/chat/history/workflow-test-001
+```
+
+### Pretty-Print JSON Responses
+
+Add `| jq` to any curl command to format JSON output (requires `jq` to be installed):
+
+```bash
+# Install jq first (if not already installed)
+# macOS: brew install jq
+# Ubuntu/Debian: sudo apt-get install jq
+
+# Example with pretty-printing
+curl -X GET http://localhost:8080/api/documents | jq '.'
+```
+
+### Save Response to File
+
+```bash
+# Save document list to file
+curl -X GET http://localhost:8080/api/documents > documents.json
+
+# Save specific document details
+curl -X GET http://localhost:8080/api/documents/{document-id} > document-details.json
+
+# Save chat history
+curl -X GET http://localhost:8080/api/chat/history/test-session-123 > chat-history.json
+```
+
+### Error Testing
+
+#### Test with Invalid Document ID
+
+```bash
+curl -X GET http://localhost:8080/api/documents/invalid-id-12345 \
+  -H "Accept: application/json"
+```
+
+Expected: 404 Not Found
+
+#### Test with Empty Content
+
+```bash
+curl -X POST http://localhost:8080/api/documents/upload-text \
+  -H "Content-Type: application/json" \
+  -d '{
+    "content": "",
+    "filename": "empty.txt"
+  }'
+```
+
+#### Test with Missing Fields
+
+```bash
+curl -X POST http://localhost:8080/api/chat/ask \
+  -H "Content-Type: application/json" \
+  -d '{
+    "question": "What is AI?"
+  }'
+```
+
+### Advanced Testing Scripts
+
+#### Batch Upload Multiple Documents
+
+```bash
+#!/bin/bash
+# save as batch-upload.sh
+
+documents=(
+  "AI:Artificial Intelligence is the simulation of human intelligence by machines."
+  "ML:Machine Learning is a method of data analysis that automates analytical model building."
+  "DL:Deep Learning is a subset of machine learning based on artificial neural networks."
+)
+
+for doc in "${documents[@]}"; do
+  IFS=':' read -r filename content <<< "$doc"
+  echo "Uploading $filename..."
+  curl -X POST http://localhost:8080/api/documents/upload-text \
+    -H "Content-Type: application/json" \
+    -d "{\"content\": \"$content\", \"filename\": \"$filename.txt\"}"
+  echo -e "\n"
+  sleep 2
+done
+
+echo "All documents uploaded!"
+```
+
+#### Interactive Chat Session
+
+```bash
+#!/bin/bash
+# save as interactive-chat.sh
+
+SESSION_ID="interactive-$(date +%s)"
+echo "Chat Session: $SESSION_ID"
+echo "Type 'exit' to quit"
+
+while true; do
+  read -p "Your question: " question
+  if [ "$question" = "exit" ]; then
+    break
+  fi
+  
+  echo "Asking AI..."
+  curl -X POST http://localhost:8080/api/chat/ask \
+    -H "Content-Type: application/json" \
+    -d "{\"question\": \"$question\", \"sessionId\": \"$SESSION_ID\"}" \
+    | jq -r '.answer'
+  echo ""
+done
+
+echo "Session ended. View history with:"
+echo "curl http://localhost:8080/api/chat/history/$SESSION_ID | jq '.'"
+```
+
+Make scripts executable:
+
+```bash
+chmod +x batch-upload.sh interactive-chat.sh
+./batch-upload.sh
+./interactive-chat.sh
+```
 
 ## 🎯 Vector Database Features
 
