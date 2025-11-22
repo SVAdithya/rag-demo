@@ -16,4 +16,6 @@ public class DocumentResponse {
     private String contentType;
     private LocalDateTime uploadedAt;
     private Long size;
+    private Boolean isConverted;
+    private String convertedPdfDownloadUrl;
 }

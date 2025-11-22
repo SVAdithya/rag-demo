@@ -19,9 +19,6 @@ public class ChatMessage {
     @Id
     private String id;
 
-    @Field(type = FieldType.Keyword)
-    private String sessionId;
-
     @Field(type = FieldType.Text)
     private String question;
 

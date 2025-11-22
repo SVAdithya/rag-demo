@@ -28,21 +28,13 @@ public class ChatController {
                 log.error("Question is empty");
                 return ResponseEntity.badRequest().body("Question cannot be empty");
             }
-            if (request.getSessionId() == null || request.getSessionId().trim().isEmpty()) {
-                log.error("SessionId is empty");
-                return ResponseEntity.badRequest().body("Session ID is required");
-            }
             if (request.getDocumentId() == null || request.getDocumentId().trim().isEmpty()) {
                 log.error("DocumentId is empty");
                 return ResponseEntity.badRequest().body("Document ID is required");
             }
 
             log.info("Received question: {} for document: {}", request.getQuestion(), request.getDocumentId());
-            ChatMessage chatMessage = chatService.askQuestion(
-                    request.getQuestion(),
-                    request.getSessionId(),
-                    request.getDocumentId()
-            );
+            ChatMessage chatMessage = chatService.askQuestion(request.getQuestion(), request.getDocumentId());
             return ResponseEntity.ok(toResponse(chatMessage));
         } catch (RuntimeException e) {
             log.error("Error processing question: {}", e.getMessage(), e);
@@ -53,9 +45,9 @@ public class ChatController {
         }
     }
 
-    @GetMapping("/history/{sessionId}")
-    public ResponseEntity<List<ChatResponse>> getChatHistory(@PathVariable String sessionId) {
-        List<ChatMessage> history = chatService.getChatHistory(sessionId);
+    @GetMapping("/history/{documentId}")
+    public ResponseEntity<List<ChatResponse>> getChatHistory(@PathVariable String documentId) {
+        List<ChatMessage> history = chatService.getChatHistory(documentId);
         List<ChatResponse> responses = history.stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
@@ -68,7 +60,6 @@ public class ChatController {
         response.setQuestion(chatMessage.getQuestion());
         response.setAnswer(chatMessage.getAnswer());
         response.setTimestamp(chatMessage.getTimestamp());
-        response.setSessionId(chatMessage.getSessionId());
         return response;
     }
 }

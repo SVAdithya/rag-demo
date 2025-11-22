@@ -25,37 +25,31 @@ public class ChatService {
 
     /**
      * Ask a question using RAG (Retrieval Augmented Generation)
-     * This retrieves relevant context from the vector store before querying the LLM
+     * This retrieves relevant context from the provided document
      */
-    public ChatMessage askQuestion(String question, String sessionId, String documentId) {
-        log.info("Processing RAG question for session: {} and document: {}", sessionId, documentId);
-
-        // Verify document exists
-        DocumentModel documentModel = documentService.getDocumentById(documentId);
-        if (documentModel == null) {
-            log.error("Document not found: {}", documentId);
-            throw new RuntimeException("Document not found: " + documentId);
-        }
+    public ChatMessage askQuestion(String question, String documentId) {
+        log.info("Processing RAG question for document: {}", documentId);
 
         String answer;
         try {
-            // Use RAG to retrieve relevant context from vector store
+            // Use RAG to retrieve relevant context from the document
             List<Document> relevantDocs = vectorStoreService.searchRelevantContextInDocument(
-                    question, documentId, 5
+                    question, documentId, 3
             );
-
             String relevantContext = vectorStoreService.formatContext(relevantDocs);
-            log.info("Retrieved {} relevant chunks from vector store", relevantDocs.size());
+            log.info("Retrieved {} relevant chunks from vector store in document",
+                    relevantDocs.size());
 
             // Get chat history
-            List<ChatMessage> history = chatMessageRepository.findBySessionIdOrderByTimestampAsc(sessionId);
+            List<ChatMessage> history = chatMessageRepository.findByDocumentIdOrderByTimestampAsc(documentId);
             String chatHistory = formatChatHistory(history);
 
             // Generate answer using RAG context
             if (relevantDocs.isEmpty()) {
                 // Fallback if no relevant context found
-                log.warn("No relevant context found in vector store for document: {}", documentId);
-                answer = aiService.answerQuestion(question, documentModel.getContent());
+                log.warn("No relevant context found in vector store");
+                DocumentModel doc = documentService.getDocumentById(documentId);
+                answer = aiService.answerQuestion(question, doc.getContent());
             } else if (chatHistory.isEmpty()) {
                 answer = aiService.answerQuestionWithRAG(question, relevantContext);
             } else {
@@ -64,26 +58,28 @@ public class ChatService {
         } catch (Exception e) {
             // Fallback to basic answer without RAG if vector store fails
             log.error("Error using vector store, falling back to basic answer", e);
-            answer = aiService.answerQuestion(question, documentModel.getContent());
+            DocumentModel doc = documentService.getDocumentById(documentId);
+            answer = aiService.answerQuestion(question, doc.getContent());
         }
 
         // Save chat message
         ChatMessage chatMessage = new ChatMessage();
         chatMessage.setId(UUID.randomUUID().toString());
-        chatMessage.setSessionId(sessionId);
         chatMessage.setQuestion(question);
         chatMessage.setAnswer(answer);
         chatMessage.setTimestamp(LocalDateTime.now());
         chatMessage.setDocumentId(documentId);
 
         ChatMessage saved = chatMessageRepository.save(chatMessage);
+
         log.info("Chat message saved with RAG: {}", saved.getId());
 
         return saved;
     }
 
-    public List<ChatMessage> getChatHistory(String sessionId) {
-        return chatMessageRepository.findBySessionIdOrderByTimestampAsc(sessionId);
+    public List<ChatMessage> getChatHistory(String documentId) {
+        // Fetch chat messages by documentId ordered by timestamp
+        return chatMessageRepository.findByDocumentIdOrderByTimestampAsc(documentId);
     }
 
     private String formatChatHistory(List<ChatMessage> history) {
